@@ -117,165 +117,82 @@ class Minimax():
 
         self.boardvalue = material + pawnsq + knightsq + bishopsq + rooksq + queensq + kingsq
 
-    def evaluate_board(self, board):
-        if board.is_checkmate():
-            if board.turn:
-                return -9999
-            else:
-                return 9999
-        if board.is_stalemate():
-            return 0
-        if board.is_insufficient_material():
-            return 0
+    # def evaluate_board(self, board):
+    #     if board.is_checkmate():
+    #         if board.turn:
+    #             return -9999
+    #         else:
+    #             return 9999
+    #     if board.is_stalemate():
+    #         return 0
+    #     if board.is_insufficient_material():
+    #         return 0
 
-        eval = self.boardvalue
-        return eval
+    #     eval = self.boardvalue
+    #     return eval
 
-    def update_eval(self, board, mov, side):
+    # def update_eval(self, board, mov, side):
 
-        # update piecequares
-        movingpiece = board.piece_type_at(mov.from_square)
-        if side:
-            self.boardvalue -= tables[movingpiece - 1][mov.from_square]
-            # update castling
-            if (mov.from_square == chess.E1) and (mov.to_square == chess.G1):
-                self.boardvalue -= rookstable[chess.H1]
-                self.boardvalue += rookstable[chess.F1]
-            elif (mov.from_square == chess.E1) and (mov.to_square == chess.C1):
-                self.boardvalue -= rookstable[chess.A1]
-                self.boardvalue += rookstable[chess.D1]
-        else:
-            self.boardvalue += tables[movingpiece - 1][mov.from_square]
-            # update castling
-            if (mov.from_square == chess.E8) and (mov.to_square == chess.G8):
-                self.boardvalue += rookstable[chess.H8]
-                self.boardvalue -= rookstable[chess.F8]
-            elif (mov.from_square == chess.E8) and (mov.to_square == chess.C8):
-                self.boardvalue += rookstable[chess.A8]
-                self.boardvalue -= rookstable[chess.D8]
+    #     # update piecequares
+    #     movingpiece = board.piece_type_at(mov.from_square)
+    #     if side:
+    #         self.boardvalue -= tables[movingpiece - 1][mov.from_square]
+    #         # update castling
+    #         if (mov.from_square == chess.E1) and (mov.to_square == chess.G1):
+    #             self.boardvalue -= rookstable[chess.H1]
+    #             self.boardvalue += rookstable[chess.F1]
+    #         elif (mov.from_square == chess.E1) and (mov.to_square == chess.C1):
+    #             self.boardvalue -= rookstable[chess.A1]
+    #             self.boardvalue += rookstable[chess.D1]
+    #     else:
+    #         self.boardvalue += tables[movingpiece - 1][mov.from_square]
+    #         # update castling
+    #         if (mov.from_square == chess.E8) and (mov.to_square == chess.G8):
+    #             self.boardvalue += rookstable[chess.H8]
+    #             self.boardvalue -= rookstable[chess.F8]
+    #         elif (mov.from_square == chess.E8) and (mov.to_square == chess.C8):
+    #             self.boardvalue += rookstable[chess.A8]
+    #             self.boardvalue -= rookstable[chess.D8]
 
-        if side:
-            self.boardvalue += tables[movingpiece - 1][mov.to_square]
-        else:
-            self.boardvalue -= tables[movingpiece - 1][mov.to_square]
+    #     if side:
+    #         self.boardvalue += tables[movingpiece - 1][mov.to_square]
+    #     else:
+    #         self.boardvalue -= tables[movingpiece - 1][mov.to_square]
 
-        # update material
-        if mov.drop != None:
-            if side:
-                self.boardvalue += piecevalues[mov.drop-1]
-            else:
-                self.boardvalue -= piecevalues[mov.drop-1]
+    #     # update material
+    #     if mov.drop != None:
+    #         if side:
+    #             self.boardvalue += piecevalues[mov.drop-1]
+    #         else:
+    #             self.boardvalue -= piecevalues[mov.drop-1]
 
-        # update promotion
-        if mov.promotion != None:
-            if side:
-                self.boardvalue += piecevalues[mov.promotion-1] - piecevalues[movingpiece-1]
-                self.boardvalue -= tables[movingpiece - 1][mov.to_square] \
-                    + tables[mov.promotion - 1][mov.to_square]
-            else:
-                self.boardvalue -= piecevalues[mov.promotion-1] + piecevalues[movingpiece-1]
-                self.boardvalue += tables[movingpiece - 1][mov.to_square] \
-                    - tables[mov.promotion - 1][mov.to_square]
+    #     # update promotion
+    #     if mov.promotion != None:
+    #         if side:
+    #             self.boardvalue += piecevalues[mov.promotion-1] - piecevalues[movingpiece-1]
+    #             self.boardvalue -= tables[movingpiece - 1][mov.to_square] \
+    #                 + tables[mov.promotion - 1][mov.to_square]
+    #         else:
+    #             self.boardvalue -= piecevalues[mov.promotion-1] + piecevalues[movingpiece-1]
+    #             self.boardvalue += tables[movingpiece - 1][mov.to_square] \
+    #                 - tables[mov.promotion - 1][mov.to_square]
 
-        return mov
+    #     return mov
 
-    def make_move(self, mov, board):
-        self.update_eval(board, mov, board.turn)
-        board.push(mov)
+    # def make_move(self, mov, board):
+    #     self.update_eval(board, mov, board.turn)
+    #     board.push(mov)
 
-        return mov
+    #     return mov
 
-    def unmake_move(self, board):
-        mov = board.pop()
-        self.update_eval(board, mov, not board.turn)
+    # def unmake_move(self, board):
+    #     mov = board.pop()
+    #     self.update_eval(board, mov, not board.turn)
 
-        return mov
-
-    def quiesce(self, board, alpha, beta):
-        stand_pat = self.evaluate_board(board)
-        if (stand_pat >= beta):
-            return beta
-        if (alpha < stand_pat):
-            alpha = stand_pat
-
-        for move in board.legal_moves:
-            if board.is_capture(move):
-                self.make_move(move, board)
-                score = -self.quiesce(board, -beta, -alpha)
-                self.unmake_move(board)
-                if (score >= beta):
-                    return beta
-                if (score > alpha):
-                    alpha = score
-        return alpha
-
-    def alphabeta(self, board, alpha, beta, depthleft):
-        bestscore = -9999
-        if (depthleft == 0):
-            return self.quiesce(board, alpha, beta)
-        for move in board.legal_moves:
-            self.make_move(move, board)
-            score = -self.alphabeta(board, -beta, -alpha, depthleft - 1)
-            self.unmake_move(board)
-            if (score >= beta):
-                time.sleep(1/10000)
-                return score
-            if (score > bestscore):
-                bestscore = score
-            if (score > alpha):
-                alpha = score
-        return bestscore
-
-    def selectmove(self, board, depth) -> chess.Move:
-        bestMove = chess.Move.null()
-        bestValue = -99999
-        alpha = -100000
-        beta = 100000
-        for move in board.legal_moves:
-            self.make_move(move, board)
-            boardValue = -self.alphabeta(board, -beta, -alpha, depth-1)
-            if boardValue > bestValue:
-                bestValue = boardValue
-                bestMove = move
-            if (boardValue > alpha):
-                alpha = boardValue
-            self.unmake_move(board)
-        return bestMove
-
-# def eval(self, board: chess.Board):
-    #     scoreWhite = 0
-    #     scoreBlack = 0
-    #     for i in range(0, 8):
-    #         for j in range(0, 8):
-    #             squareIJ = chess.square(i, j)
-    #             posicao = 8*i+j
-    #             pieceIJ = board.piece_at(squareIJ)
-    #             if str(pieceIJ) == "P":
-    #                 scoreWhite += (100 + pawntable[posicao])
-    #             if str(pieceIJ) == "N":
-    #                 scoreWhite += (310 + knightstable[posicao])
-    #             if str(pieceIJ) == "B":
-    #                 scoreWhite += (320 + bishopstable[posicao])
-    #             if str(pieceIJ) == "R":
-    #                 scoreWhite += (500 + rookstable[posicao])
-    #             if str(pieceIJ) == "Q":
-    #                 scoreWhite += (900 + queenstable[posicao])
-    #             if str(pieceIJ) == "p":
-    #                 scoreBlack += (100 + pawntable[posicao])
-    #             if str(pieceIJ) == "n":
-    #                 scoreBlack += (310 + knightstable[posicao])
-    #             if str(pieceIJ) == "b":
-    #                 scoreBlack += (320 + bishopstable[posicao])
-    #             if str(pieceIJ) == "r":
-    #                 scoreBlack += (500 + rookstable[posicao])
-    #             if str(pieceIJ) == "q":
-    #                 scoreBlack += (900 + queenstable[posicao])
-
-    #     valor = scoreWhite - scoreBlack
-    #     return valor
+    #     return mov
 
     # def quiesce(self, board, alpha, beta):
-    #     stand_pat = self.eval(board)
+    #     stand_pat = self.evaluate_board(board)
     #     if (stand_pat >= beta):
     #         return beta
     #     if (alpha < stand_pat):
@@ -283,76 +200,159 @@ class Minimax():
 
     #     for move in board.legal_moves:
     #         if board.is_capture(move):
-    #             board.push(move)
+    #             self.make_move(move, board)
     #             score = -self.quiesce(board, -beta, -alpha)
-    #             board.pop()
+    #             self.unmake_move(board)
     #             if (score >= beta):
     #                 return beta
     #             if (score > alpha):
     #                 alpha = score
     #     return alpha
 
-    # def search(self, board: chess.Board, depth: int, a: int, b: int, maxm: bool):
-    #     if board.is_checkmate():
-    #         if board.turn == chess.WHITE:
-    #             return -10000
-    #         else:
-    #             return 10000
-
-    #     if board.is_stalemate() or board.is_insufficient_material():
-    #         return 0
-
-    #     if depth == 0:
-    #         return self.quiesce(board, a, b)
-
-    #     # time.sleep(1/10000)
-    #     depth -= 1
-    #     legalMove = board.legal_moves
-    #     if maxm:
-    #         bestScore = -self.INF
-    #         for move in legalMove:
-    #             board.push(move)
-    #             bestScore = max(bestScore, self.search(
-    #                 board, depth, a, b, not maxm))
-    #             board.pop()
-    #             a = max(a, bestScore)
-    #             if a >= b:
-    #                 # time.sleep(1/10000)
-    #                 return bestScore
-
-    #         return bestScore
-    #     else:
-    #         bestScore = self.INF
-    #         for move in legalMove:
-    #             board.push(move)
-    #             bestScore = min(bestScore, self.search(
-    #                 board, depth, a, b, not maxm))
-    #             board.pop()
-    #             b = min(a, bestScore)
-    #             if b <= a:
-    #                 time.sleep(1/10000)
-    #                 return bestScore
-
-    #         return bestScore
-
-    # def nextMove(self, depth: int, board: chess.Board, maxm: bool = True):
-    #     bestMove = None
-    #     bestScore = -self.INF if maxm else self.INF
-
+    # def alphabeta(self, board, alpha, beta, depthleft):
+    #     bestscore = -9999
+    #     if (depthleft == 0):
+    #         return self.quiesce(board, alpha, beta)
     #     for move in board.legal_moves:
-    #         board.push(move)
-    #         score = self.search(board, depth - 1, -
-    #                             self.INF, self.INF, not maxm)
-    #         board.pop()
-    #         if maxm:
-    #             if score > bestScore:
-    #                 bestScore = score
-    #                 bestMove = move
-    #         else:
-    #             # score = score*-1
-    #             if score < bestScore:
-    #                 bestScore = score
-    #                 bestMove = move
+    #         self.make_move(move, board)
+    #         score = -self.alphabeta(board, -beta, -alpha, depthleft - 1)
+    #         self.unmake_move(board)
+    #         if (score >= beta):
+    #             time.sleep(1/10000)
+    #             return score
+    #         if (score > bestscore):
+    #             bestscore = score
+    #         if (score > alpha):
+    #             alpha = score
+    #     return bestscore
 
-    #     return (bestMove, bestScore)
+    # def selectmove(self, board, depth) -> chess.Move:
+    #     bestMove = chess.Move.null()
+    #     bestValue = -99999
+    #     alpha = -100000
+    #     beta = 100000
+    #     for move in board.legal_moves:
+    #         self.make_move(move, board)
+    #         boardValue = -self.alphabeta(board, -beta, -alpha, depth-1)
+    #         if boardValue > bestValue:
+    #             bestValue = boardValue
+    #             bestMove = move
+    #         if (boardValue > alpha):
+    #             alpha = boardValue
+    #         self.unmake_move(board)
+    #     return bestMove
+
+    def eval(self, board: chess.Board):
+            scoreWhite = 0
+            scoreBlack = 0
+            for i in range(0, 8):
+                for j in range(0, 8):
+                    squareIJ = chess.square(i, j)
+                    posicao = 8*i+j
+                    pieceIJ = board.piece_at(squareIJ)
+                    if str(pieceIJ) == "P":
+                        scoreWhite += (100 + pawntable[posicao])
+                    if str(pieceIJ) == "N":
+                        scoreWhite += (310 + knightstable[posicao])
+                    if str(pieceIJ) == "B":
+                        scoreWhite += (320 + bishopstable[posicao])
+                    if str(pieceIJ) == "R":
+                        scoreWhite += (500 + rookstable[posicao])
+                    if str(pieceIJ) == "Q":
+                        scoreWhite += (900 + queenstable[posicao])
+                    if str(pieceIJ) == "p":
+                        scoreBlack += (100 + pawntable[posicao])
+                    if str(pieceIJ) == "n":
+                        scoreBlack += (310 + knightstable[posicao])
+                    if str(pieceIJ) == "b":
+                        scoreBlack += (320 + bishopstable[posicao])
+                    if str(pieceIJ) == "r":
+                        scoreBlack += (500 + rookstable[posicao])
+                    if str(pieceIJ) == "q":
+                        scoreBlack += (900 + queenstable[posicao])
+
+            valor = scoreWhite - scoreBlack
+            return valor
+
+    def quiesce(self, board, alpha, beta):
+        stand_pat = self.eval(board)
+        if (stand_pat >= beta):
+            return beta
+        if (alpha < stand_pat):
+            alpha = stand_pat
+
+        for move in board.legal_moves:
+            if board.is_capture(move):
+                board.push(move)
+                score = -self.quiesce(board, -beta, -alpha)
+                board.pop()
+                if (score >= beta):
+                    return beta
+                if (score > alpha):
+                    alpha = score
+        return alpha
+
+    def search(self, board: chess.Board, depth: int, a: int, b: int, maxm: bool):
+        if board.is_checkmate():
+            if board.turn == chess.WHITE:
+                return -10000
+            else:
+                return 10000
+
+        if board.is_stalemate() or board.is_insufficient_material():
+            return 0
+
+        if depth == 0:
+            return self.quiesce(board, a, b)
+
+        # time.sleep(1/10000)
+        depth -= 1
+        legalMove = board.legal_moves
+        if maxm:
+            bestScore = -self.INF
+            for move in legalMove:
+                board.push(move)
+                bestScore = max(bestScore, self.search(
+                    board, depth, a, b, not maxm))
+                board.pop()
+                a = max(a, bestScore)
+                if a >= b:
+                    # time.sleep(1/10000)
+                    return bestScore
+
+            return bestScore
+        else:
+            bestScore = self.INF
+            for move in legalMove:
+                board.push(move)
+                bestScore = min(bestScore, self.search(
+                    board, depth, a, b, not maxm))
+                board.pop()
+                b = min(a, bestScore)
+                if b <= a:
+                    time.sleep(1/10000)
+                    return bestScore
+
+            return bestScore
+
+    def nextMove(self, depth: int, board: chess.Board, maxm: bool = True):
+        bestMove = None
+        bestScore = -self.INF if maxm else self.INF
+
+        for move in board.legal_moves:
+            board.push(move)
+            score = self.search(board, depth - 1, -
+                                self.INF, self.INF, not maxm)
+            board.pop()
+            if maxm:
+                if score > bestScore:
+                    bestScore = score
+                    bestMove = move
+            else:
+                # score = score*-1
+                if score < bestScore:
+                    bestScore = score
+                    bestMove = move
+
+        return (bestMove, bestScore)
 

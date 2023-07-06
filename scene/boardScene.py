@@ -205,9 +205,10 @@ class BoardScene(Scene):
 
     @staticmethod
     async def __minimax(board, callback):
-        move = Minimax().selectmove(board.copy(), 4)
+        # move = Minimax().selectmove(board.copy(), 4)
+        move = Minimax().nextMove(4,board.copy())
         logging.debug(move)
-        callback(move)
+        callback(move[0])
 
     def __minimaxMove(self):
         if not self.__awaitingAgent:

@@ -132,7 +132,6 @@ class Minimax():
         return eval
 
     def update_eval(self, board, mov, side):
-        global boardvalue
 
         # update piecequares
         movingpiece = board.piece_type_at(mov.from_square)

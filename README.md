@@ -43,7 +43,3 @@ O bot utiliza o algoritmo Minimax com uma profundidade configurável para calcul
 - Implementação de um sistema de dicas para o jogador.
 - Ajuste da dificuldade do bot baseado em níveis de profundidade do algoritmo Minimax.
 - Ajuste de heurísticas usadas para tomada de decisão do bot.
-
-### Contribuidores
-- [jopzoli]
-- [Morphy999]
